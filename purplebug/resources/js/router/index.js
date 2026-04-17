@@ -19,7 +19,12 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/auth/LoginView.vue')
     },
-    // Protected routes will be added later
+    {
+    path: '/admin/dashboard',
+    name: 'admin-dashboard',
+    component: () => import('../views/admin/DashboardView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+    },
   ]
 });
 
@@ -29,9 +34,14 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     next('/login');
-  } else if ((to.path === '/login' || to.path === '/register') && authStore.isLoggedIn) {
+  }
+  else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    next('/'); // Guests cannot access admin
+  }
+  else if ((to.path === '/login' || to.path === '/register') && authStore.isLoggedIn) {
     next(authStore.isAdmin ? '/admin/dashboard' : '/');
-  } else {
+  }
+  else {
     next();
   }
 });
