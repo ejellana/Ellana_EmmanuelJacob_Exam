@@ -6,14 +6,14 @@
         <p class="text-gray-500 text-sm">Inventory and catalog control</p>
       </div>
       <button @click="openCreateModal"
-              class="bg-purple-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-800 transition-colors shadow-sm flex items-center gap-2">
+              class="bg-[#7D3C98] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-800 transition-colors shadow-sm flex items-center gap-2">
         <span class="text-lg">+</span> Add New Product
       </button>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-xl border border-[#C8A2C8] shadow-sm overflow-hidden">
       <table class="w-full text-left">
-        <thead class="bg-purple-600 text-white">
+        <thead class="bg-[#7D3C98] text-white">
           <tr>
             <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Product Name</th>
             <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Price</th>
@@ -58,11 +58,11 @@
 
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden border border-gray-200">
-        <div class="bg-purple-700 p-4 px-8 flex justify-between items-center">
+        <div class="bg-[#7D3C98] p-4 px-8 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-white">{{ isEditing ? 'Edit Product' : 'Add New Product' }}</h3>
           <div class="flex gap-2">
-            <button @click="saveProduct" class="bg-white text-purple-700 px-5 py-1.5 rounded-md font-bold text-xs hover:bg-gray-100 transition-all">SAVE</button>
-            <button @click="closeModal" class="bg-purple-800 text-white px-5 py-1.5 rounded-md font-bold text-xs hover:bg-purple-900 transition-all border border-purple-500/30">CANCEL</button>
+            <button @click="saveProduct" class="bg-white text-[#7D3C98] px-5 py-1.5 rounded-md font-bold text-xs hover:bg-gray-100 transition-all">SAVE</button>
+            <button @click="closeModal" class="bg-[#7D3C98] text-white px-5 py-1.5 rounded-md font-bold text-xs hover:bg-purple-900 transition-all border border-purple-500/30">CANCEL</button>
           </div>
         </div>
 

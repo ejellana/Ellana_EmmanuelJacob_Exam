@@ -1,18 +1,23 @@
+I have updated the colors in your code to use the specific hex code #7D3C98.
+
+Since Tailwind's default purple-700 or purple-800 won't exactly match that custom hex, I've swapped those utility classes for inline styles or custom arbitrary values (like bg-[#7D3C98]) to ensure the brand alignment is perfect.
+
+Code snippet
 <template>
   <div class="min-h-screen bg-[#f8f7ff] flex flex-col">
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-[1440px] mx-auto px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🐞</span>
-          <h1 class="text-xl font-bold text-gray-800 tracking-tight">
-            PurpleBug<span class="text-purple-600 font-normal text-[10px] align-super">®</span>
-          </h1>
+        <div class="flex items-center">
+          <img
+            src="/PurpleBug-Logo.png"
+            alt="PurpleBug Logo"
+            class="h-9 w-auto object-contain">
         </div>
 
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center border border-purple-100">
-              <span class="text-purple-600 text-sm">👤</span>
+              <span class="text-[#7D3C98] text-sm">👤</span>
             </div>
             <div class="flex flex-col">
               <span class="text-sm font-bold text-gray-700 leading-none mb-1">
@@ -23,19 +28,19 @@
           </div>
 
           <button v-if="authStore.isLoggedIn" @click="showCartModal = true"
-                  class="relative text-gray-400 hover:text-purple-600 transition-colors p-2">
+                  class="relative text-gray-400 hover:text-[#7D3C98] transition-colors p-2">
             <span class="text-xl">🛒</span>
             <span v-if="cartStore.totalItems > 0"
-                  class="absolute top-0 right-0 bg-purple-600 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-md font-bold shadow-sm">
+                  class="absolute top-0 right-0 bg-[#7D3C98] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-md font-bold shadow-sm">
               {{ cartStore.totalItems }}
             </span>
           </button>
 
           <template v-if="!authStore.isLoggedIn">
-            <router-link to="/login" class="text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 transition font-bold text-xs border border-purple-100 uppercase tracking-wide">
+            <router-link to="/login" class="text-[#7D3C98] px-4 py-2 rounded-lg hover:bg-purple-50 transition font-bold text-xs border border-purple-100 uppercase tracking-wide">
               Login
             </router-link>
-            <router-link to="/register" class="bg-purple-700 text-white px-5 py-2 rounded-lg hover:bg-purple-800 transition font-bold text-xs shadow-sm uppercase tracking-wide">
+            <router-link to="/register" class="bg-[#7D3C98] text-white px-5 py-2 rounded-lg hover:opacity-90 transition font-bold text-xs shadow-sm uppercase tracking-wide">
               Sign Up
             </router-link>
           </template>
@@ -51,18 +56,18 @@
       <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div class="relative w-full max-w-md">
           <input v-model="searchQuery" type="text" placeholder="Search product name..."
-                 class="w-full border border-gray-200 rounded-lg py-2.5 px-6 pl-12 text-sm text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-purple-500 outline-none transition-all shadow-sm bg-white">
+                 class="w-full border border-gray-200 rounded-lg py-2.5 px-6 pl-12 text-sm text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-[#7D3C98] outline-none transition-all shadow-sm bg-white">
           <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
         </div>
 
         <div class="flex items-center gap-2 w-full md:w-auto">
           <button @click="sortOrder = 'asc'"
-                  :class="sortOrder === 'asc' ? 'bg-purple-700 text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
+                  :class="sortOrder === 'asc' ? 'bg-[#7D3C98] text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
                   class="flex-1 md:flex-none border px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide">
             Price Ascending
           </button>
           <button @click="sortOrder = 'desc'"
-                  :class="sortOrder === 'desc' ? 'bg-purple-700 text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
+                  :class="sortOrder === 'desc' ? 'bg-[#7D3C98] text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
                   class="flex-1 md:flex-none border px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide">
             Price Descending
           </button>
@@ -71,13 +76,13 @@
 
       <div v-if="paginatedProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div v-for="product in paginatedProducts" :key="product.id"
-             class="flex flex-col group bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+              class="flex flex-col group bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
 
           <div class="aspect-[4/3] bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-4 border border-gray-100 relative">
             <img v-if="product.image"
-                 :src="'/storage/' + product.image"
-                 class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
-                 @error="(e) => { e.target.src = 'https://placehold.co/600x400?text=No+Image' }">
+                  :src="'/storage/' + product.image"
+                  class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+                  @error="(e) => { e.target.src = 'https://placehold.co/600x400?text=No+Image' }">
             <div v-else class="text-4xl opacity-20">🖼️</div>
           </div>
 
@@ -85,7 +90,7 @@
             <h3 class="text-gray-500 font-bold text-[10px] uppercase tracking-widest mb-1">Premium Product</h3>
             <h3 class="text-gray-800 font-semibold text-lg mb-2">{{ product.name }}</h3>
             <div class="flex items-end justify-between">
-              <p class="text-2xl font-bold text-purple-800">
+              <p class="text-2xl font-bold text-[#7D3C98]">
                 ₱{{ parseFloat(product.price).toLocaleString() }}
               </p>
               <p class="text-[10px] text-gray-400 font-bold uppercase">Stock: {{ product.stocks }}</p>
@@ -94,7 +99,7 @@
 
           <button @click="openQuickView(product)"
                   :disabled="product.stocks <= 0"
-                  class="mt-5 w-full bg-purple-700 text-white py-2.5 rounded-lg hover:bg-purple-800 disabled:bg-gray-100 disabled:text-gray-400 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-sm">
+                  class="mt-5 w-full bg-[#7D3C98] text-white py-2.5 rounded-lg hover:opacity-90 disabled:bg-gray-100 disabled:text-gray-400 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-sm">
             {{ product.stocks > 0 ? 'Add to Cart' : 'Sold Out' }}
           </button>
         </div>
@@ -108,7 +113,7 @@
         </button>
         <button v-for="page in totalPages" :key="page"
                 @click="changePage(page)"
-                :class="currentPage === page ? 'bg-purple-700 text-white border-purple-700' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'"
+                :class="currentPage === page ? 'bg-[#7D3C98] text-white border-[#7D3C98]' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'"
                 class="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-xs transition-all border shadow-sm">
             {{ page }}
         </button>
@@ -122,9 +127,11 @@
 
     <footer class="bg-white border-t border-gray-200 py-10">
       <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
-        <div class="flex items-center gap-2 mb-3 opacity-30">
-          <span class="text-xl">🐞</span>
-          <h1 class="text-lg font-bold text-gray-900 tracking-tighter">PurpleBug</h1>
+        <div class="flex items-center">
+          <img
+            src="/PurpleBug-Logo.png"
+            alt="PurpleBug Logo"
+            class="h-8 w-auto object-contain">
         </div>
         <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">© 2026 PurpleBug Administrative Suite</p>
       </div>
@@ -141,7 +148,7 @@
 
           <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
             <div class="mb-6">
-              <h3 class="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">Add to Cart</h3>
+              <h3 class="text-xs font-bold text-[#7D3C98] uppercase tracking-widest mb-1">Add to Cart</h3>
               <h2 class="text-2xl font-bold text-gray-800 leading-tight mb-2">{{ selectedProduct.name }}</h2>
               <p class="text-3xl font-black text-gray-900">₱{{ parseFloat(selectedProduct.price).toLocaleString() }}</p>
             </div>
@@ -158,7 +165,7 @@
 
               <div class="flex flex-col gap-2">
                 <button @click="confirmAddToCart"
-                        class="w-full bg-purple-700 text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-purple-800 transition-all shadow-md active:scale-95">
+                        class="w-full bg-[#7D3C98] text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-md active:scale-95">
                   Confirm Add
                 </button>
                 <button @click="showQuickView = false"
@@ -190,7 +197,7 @@
             </div>
             <div class="flex-1">
               <h4 class="text-sm font-bold text-gray-800">{{ item.name }}</h4>
-              <p class="text-purple-700 font-bold text-sm">₱{{ (item.price * item.quantity).toLocaleString() }}</p>
+              <p class="text-[#7D3C98] font-bold text-sm">₱{{ (item.price * item.quantity).toLocaleString() }}</p>
             </div>
             <div class="flex items-center border border-gray-200 rounded overflow-hidden h-8">
               <button @click="decreaseQty(item)" class="px-2 hover:bg-gray-50">-</button>
@@ -201,13 +208,13 @@
           </div>
         </div>
 
-        <div class="p-6 bg-purple-700 text-white flex justify-between items-center">
+        <div class="p-6 bg-[#7D3C98] text-white flex justify-between items-center">
           <div>
             <p class="text-[10px] font-bold uppercase opacity-70">Total Amount</p>
             <p class="text-3xl font-bold">₱{{ cartStore.totalAmount.toLocaleString() }}</p>
           </div>
           <button @click="checkout" :disabled="cartStore.items.length === 0"
-                  class="bg-white text-purple-700 px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-gray-100 disabled:opacity-50">
+                  class="bg-white text-[#7D3C98] px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-gray-100 disabled:opacity-50">
             Place Order
           </button>
         </div>

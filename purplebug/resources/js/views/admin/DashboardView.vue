@@ -1,10 +1,12 @@
 <template>
-  <div class="min-h-screen bg-[#f8f7ff] flex">
+  <div class="min-h-screen bg-[#C8A2C8] flex">
     <div class="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-gray-200 z-50 shadow-sm">
       <div class="p-6">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🐞</span>
-          <h1 class="text-xl font-bold text-gray-800 tracking-tight">PurpleBug</h1>
+        <div class="flex items-center">
+          <img
+            src="/PurpleBug-Logo.png"
+            alt="PurpleBug Logo"
+            class="h-10 w-auto object-contain">
         </div>
         <div class="h-[1px] bg-gray-100 mt-6 w-full"></div>
       </div>
@@ -12,19 +14,19 @@
       <nav class="flex-1 px-3 space-y-1">
         <button @click="switchPage('products')"
                 class="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-sm font-medium"
-                :class="currentPage === 'products' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
+                :class="currentPage === 'products' ? 'bg-[#7D3C98] text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
           <span class="text-xl">📦</span> Products Management
         </button>
 
         <button @click="switchPage('orders')"
                 class="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-sm font-medium"
-                :class="currentPage === 'orders' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
+                :class="currentPage === 'orders' ? 'bg-[#7D3C98] text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
           <span class="text-xl">📋</span> Orders
         </button>
 
         <button @click="switchPage('users')"
                 class="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-sm font-medium"
-                :class="currentPage === 'users' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
+                :class="currentPage === 'users' ? 'bg-[#7D3C98] text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
           <span class="text-xl">👥</span> Users Management
         </button>
       </nav>
