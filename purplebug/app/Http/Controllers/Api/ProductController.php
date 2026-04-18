@@ -30,7 +30,7 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('public/products', $filename);
+            $image->storeAs('products', $filename, 'public');
             $data['image'] = 'products/' . $filename;
         }
 

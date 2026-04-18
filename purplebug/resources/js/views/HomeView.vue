@@ -1,119 +1,223 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
-
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-        <h1 class="text-4xl font-bold text-purple-600">PurpleBug</h1>
+  <div class="min-h-screen bg-[#f8f7ff] flex flex-col">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <div class="max-w-[1440px] mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🐞</span>
+          <h1 class="text-xl font-bold text-gray-800 tracking-tight">
+            PurpleBug<span class="text-purple-600 font-normal text-[10px] align-super">®</span>
+          </h1>
+        </div>
 
         <div class="flex items-center gap-6">
-          <span class="text-gray-600">
-            Hi, {{ authStore.isLoggedIn ? authStore.user?.full_name : 'Guest' }}!
-          </span>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center border border-purple-100">
+              <span class="text-purple-600 text-sm">👤</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-sm font-bold text-gray-700 leading-none mb-1">
+                Hi, {{ authStore.isLoggedIn ? authStore.user?.full_name : 'Guest' }}!
+              </span>
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Store Access</span>
+            </div>
+          </div>
 
-          <router-link v-if="!authStore.isLoggedIn" to="/login" class="px-5 py-2 text-purple-600 hover:bg-purple-50 rounded-xl font-medium">
-            Login
-          </router-link>
-
-          <router-link v-if="!authStore.isLoggedIn" to="/register" class="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700">
-            Sign Up
-          </router-link>
-
-          <!-- Cart Button -->
           <button v-if="authStore.isLoggedIn" @click="showCartModal = true"
-                  class="relative flex items-center gap-2 bg-white border border-purple-200 hover:border-purple-300 px-6 py-2.5 rounded-xl font-medium">
-            🛒 Cart
+                  class="relative text-gray-400 hover:text-purple-600 transition-colors p-2">
+            <span class="text-xl">🛒</span>
             <span v-if="cartStore.totalItems > 0"
-                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                  class="absolute top-0 right-0 bg-purple-600 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-md font-bold shadow-sm">
               {{ cartStore.totalItems }}
             </span>
           </button>
 
-          <button v-if="authStore.isLoggedIn" @click="logout" class="bg-red-600 text-white px-5 py-2 rounded-xl hover:bg-red-700">
+          <template v-if="!authStore.isLoggedIn">
+            <router-link to="/login" class="text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 transition font-bold text-xs border border-purple-100 uppercase tracking-wide">
+              Login
+            </router-link>
+            <router-link to="/register" class="bg-purple-700 text-white px-5 py-2 rounded-lg hover:bg-purple-800 transition font-bold text-xs shadow-sm uppercase tracking-wide">
+              Sign Up
+            </router-link>
+          </template>
+
+          <button v-else @click="logout" class="text-gray-500 hover:text-red-600 px-4 py-2 rounded-lg transition text-xs font-bold uppercase border border-gray-200">
             Logout
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Products Grid -->
-    <section class="max-w-7xl mx-auto px-6 py-12 flex-1">
-      <h2 class="text-3xl font-semibold mb-8 text-center">All Products</h2>
+    <main class="max-w-[1440px] mx-auto w-full px-6 py-10 flex-1">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div class="relative w-full max-w-md">
+          <input v-model="searchQuery" type="text" placeholder="Search product name..."
+                 class="w-full border border-gray-200 rounded-lg py-2.5 px-6 pl-12 text-sm text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-purple-500 outline-none transition-all shadow-sm bg-white">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+        </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <div v-for="product in products" :key="product.id" class="bg-white rounded-2xl shadow hover:shadow-xl overflow-hidden group">
-          <div class="h-52 bg-gray-100 flex items-center justify-center overflow-hidden">
-            <img v-if="product.image" :src="'/storage/' + product.image" class="w-full h-full object-cover group-hover:scale-105 transition">
-          </div>
-          <div class="p-5">
-            <h3 class="font-semibold text-lg">{{ product.name }}</h3>
-            <p class="text-2xl font-bold text-purple-600 mt-1">₱{{ parseFloat(product.price).toFixed(2) }}</p>
-            <p class="text-sm text-gray-500">Stocks: {{ product.stocks }}</p>
-
-            <button @click="addToCart(product)"
-                    :disabled="product.stocks <= 0"
-                    class="mt-4 w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 disabled:bg-gray-400">
-              {{ product.stocks > 0 ? 'Add to Cart' : 'Out of Stock' }}
-            </button>
-          </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button @click="sortOrder = 'asc'"
+                  :class="sortOrder === 'asc' ? 'bg-purple-700 text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
+                  class="flex-1 md:flex-none border px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide">
+            Price Ascending
+          </button>
+          <button @click="sortOrder = 'desc'"
+                  :class="sortOrder === 'desc' ? 'bg-purple-700 text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'"
+                  class="flex-1 md:flex-none border px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide">
+            Price Descending
+          </button>
         </div>
       </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-8 mt-auto">
-      <div class="max-w-7xl mx-auto px-6 text-center">
-        <p class="text-white">PurpleBug &copy; 2025. All Rights Reserved.</p>
+      <div v-if="paginatedProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div v-for="product in paginatedProducts" :key="product.id"
+             class="flex flex-col group bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+
+          <div class="aspect-[4/3] bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-4 border border-gray-100 relative">
+            <img v-if="product.image"
+                 :src="'/storage/' + product.image"
+                 class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+                 @error="(e) => { e.target.src = 'https://placehold.co/600x400?text=No+Image' }">
+            <div v-else class="text-4xl opacity-20">🖼️</div>
+          </div>
+
+          <div class="flex-1">
+            <h3 class="text-gray-500 font-bold text-[10px] uppercase tracking-widest mb-1">Premium Product</h3>
+            <h3 class="text-gray-800 font-semibold text-lg mb-2">{{ product.name }}</h3>
+            <div class="flex items-end justify-between">
+              <p class="text-2xl font-bold text-purple-800">
+                ₱{{ parseFloat(product.price).toLocaleString() }}
+              </p>
+              <p class="text-[10px] text-gray-400 font-bold uppercase">Stock: {{ product.stocks }}</p>
+            </div>
+          </div>
+
+          <button @click="openQuickView(product)"
+                  :disabled="product.stocks <= 0"
+                  class="mt-5 w-full bg-purple-700 text-white py-2.5 rounded-lg hover:bg-purple-800 disabled:bg-gray-100 disabled:text-gray-400 transition-all font-bold text-xs uppercase tracking-widest active:scale-95 shadow-sm">
+            {{ product.stocks > 0 ? 'Add to Cart' : 'Sold Out' }}
+          </button>
+        </div>
+      </div>
+
+      <div v-if="products.length > 0" class="flex justify-center items-center gap-2 mt-12">
+        <button @click="changePage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="px-3 py-2 text-xs font-bold transition-colors border border-gray-200 rounded-lg hover:bg-white disabled:opacity-30">
+            ← PREV
+        </button>
+        <button v-for="page in totalPages" :key="page"
+                @click="changePage(page)"
+                :class="currentPage === page ? 'bg-purple-700 text-white border-purple-700' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'"
+                class="w-9 h-9 flex items-center justify-center rounded-lg font-bold text-xs transition-all border shadow-sm">
+            {{ page }}
+        </button>
+        <button @click="changePage(currentPage + 1)"
+                :disabled="currentPage === totalPages || totalPages === 0"
+                class="px-3 py-2 text-xs font-bold transition-colors border border-gray-200 rounded-lg hover:bg-white disabled:opacity-30">
+            NEXT →
+        </button>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-10">
+      <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
+        <div class="flex items-center gap-2 mb-3 opacity-30">
+          <span class="text-xl">🐞</span>
+          <h1 class="text-lg font-bold text-gray-900 tracking-tighter">PurpleBug</h1>
+        </div>
+        <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">© 2026 PurpleBug Administrative Suite</p>
       </div>
     </footer>
 
-    <!-- Cart Modal -->
-    <div v-if="showCartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div class="flex justify-between items-center px-8 py-6 border-b">
-        <h2 class="text-2xl font-bold">🛒 Your Cart</h2>
-        <button @click="showCartModal = false" class="text-4xl text-gray-400 hover:text-gray-600">×</button>
+    <div v-if="showQuickView" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div class="bg-white rounded-xl w-full max-w-xl shadow-2xl overflow-hidden border border-gray-200">
+        <div class="flex flex-col md:flex-row">
+          <div class="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
+            <img v-if="selectedProduct.image" :src="'/storage/' + selectedProduct.image"
+                 class="max-w-full max-h-48 object-contain drop-shadow-lg">
+            <div v-else class="text-6xl opacity-20">🖼️</div>
+          </div>
+
+          <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+            <div class="mb-6">
+              <h3 class="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">Add to Cart</h3>
+              <h2 class="text-2xl font-bold text-gray-800 leading-tight mb-2">{{ selectedProduct.name }}</h2>
+              <p class="text-3xl font-black text-gray-900">₱{{ parseFloat(selectedProduct.price).toLocaleString() }}</p>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-tighter mb-2">Quantity</label>
+                <div class="flex items-center w-32 border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
+                  <button @click="quickQty > 1 ? quickQty-- : null" class="flex-1 py-2 hover:bg-gray-50 transition-colors border-r border-gray-100 font-bold">-</button>
+                  <span class="flex-1 text-center font-bold text-sm">{{ quickQty }}</span>
+                  <button @click="quickQty < selectedProduct.stocks ? quickQty++ : null" class="flex-1 py-2 hover:bg-gray-50 transition-colors border-l border-gray-100 font-bold">+</button>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <button @click="confirmAddToCart"
+                        class="w-full bg-purple-700 text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-purple-800 transition-all shadow-md active:scale-95">
+                  Confirm Add
+                </button>
+                <button @click="showQuickView = false"
+                        class="w-full bg-white text-gray-400 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:text-gray-600 transition-all">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showCartModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200">
+        <div class="p-5 flex justify-between items-center bg-white border-b border-gray-100">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🛒</span>
+            <h2 class="text-lg font-bold text-gray-800 uppercase tracking-tight">Shopping Cart</h2>
+          </div>
+          <button @click="showCartModal = false" class="text-2xl text-gray-300 hover:text-gray-600 transition-colors">&times;</button>
         </div>
 
         <div class="flex-1 p-6 overflow-auto space-y-4">
-        <div v-if="cartStore.items.length === 0" class="text-center py-16 text-gray-500">
-            Your cart is empty
-        </div>
-
-        <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 bg-gray-50 p-4 rounded-2xl">
-            <img v-if="item.image" :src="'/storage/' + item.image" class="w-20 h-20 object-cover rounded-xl">
+          <div v-if="cartStore.items.length === 0" class="text-center py-10 text-gray-400 italic">Cart is empty</div>
+          <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 items-center bg-[#fdfcff] p-4 rounded-lg border border-gray-100">
+            <div class="w-20 h-16 bg-white rounded border border-gray-100 flex-shrink-0 p-1">
+              <img v-if="item.image" :src="'/storage/' + item.image" class="w-full h-full object-contain">
+            </div>
             <div class="flex-1">
-            <h4 class="font-semibold">{{ item.name }}</h4>
-            <p class="text-purple-600 font-bold">₱{{ (item.price * item.quantity).toFixed(2) }}</p>
-
-            <div class="flex items-center gap-4 mt-3">
-                <button @click="decreaseQty(item)" class="w-8 h-8 border rounded-lg hover:bg-gray-100">-</button>
-                <span class="font-medium w-6 text-center">{{ item.quantity }}</span>
-                <button @click="increaseQty(item)" class="w-8 h-8 border rounded-lg hover:bg-gray-100">+</button>
-                <button @click="removeItem(item.id)" class="ml-auto text-red-600 hover:text-red-700">Remove</button>
+              <h4 class="text-sm font-bold text-gray-800">{{ item.name }}</h4>
+              <p class="text-purple-700 font-bold text-sm">₱{{ (item.price * item.quantity).toLocaleString() }}</p>
             </div>
+            <div class="flex items-center border border-gray-200 rounded overflow-hidden h-8">
+              <button @click="decreaseQty(item)" class="px-2 hover:bg-gray-50">-</button>
+              <span class="px-3 text-xs font-bold">{{ item.quantity }}</span>
+              <button @click="increaseQty(item)" class="px-2 hover:bg-gray-50">+</button>
             </div>
-        </div>
+            <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors">🗑️</button>
+          </div>
         </div>
 
-        <div class="p-6 border-t bg-gray-50 rounded-b-3xl">
-        <div class="flex justify-between text-xl font-bold mb-6">
-            <span>Total</span>
-            <span>₱{{ cartStore.totalAmount.toFixed(2) }}</span>
-        </div>
-        <button @click="checkout"
-                :disabled="cartStore.items.length === 0"
-                class="w-full bg-purple-600 text-white py-4 rounded-2xl text-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400">
+        <div class="p-6 bg-purple-700 text-white flex justify-between items-center">
+          <div>
+            <p class="text-[10px] font-bold uppercase opacity-70">Total Amount</p>
+            <p class="text-3xl font-bold">₱{{ cartStore.totalAmount.toLocaleString() }}</p>
+          </div>
+          <button @click="checkout" :disabled="cartStore.items.length === 0"
+                  class="bg-white text-purple-700 px-8 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-gray-100 disabled:opacity-50">
             Place Order
-        </button>
+          </button>
         </div>
-    </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
@@ -123,39 +227,26 @@ const authStore = useAuthStore();
 const cartStore = useCartStore();
 const router = useRouter();
 
+// State
 const products = ref([]);
 const showCartModal = ref(false);
+const showQuickView = ref(false);
+const selectedProduct = ref(null);
+const quickQty = ref(1);
+
+const searchQuery = ref('');
+const sortOrder = ref('latest');
+const currentPage = ref(1);
+const itemsPerPage = 8;
 let refreshInterval = null;
 
+// Methods
 const fetchProducts = async () => {
-  const res = await axios.get('/api/products');
-  products.value = res.data;
-};
-
-const addToCart = async (product) => {
-  if (!authStore.isLoggedIn) {
-    alert("Please login first to add items to cart!");
-    router.push('/login');
-    return;
-  }
-
-  const success = await cartStore.addToCart(product);
-  if (success) {
-    alert(`Added ${product.name} to cart`);
-  }
-};
-
-const increaseQty = (item) => cartStore.updateQuantity(item.id, item.quantity + 1);
-const decreaseQty = (item) => {
-  if (item.quantity > 1) cartStore.updateQuantity(item.id, item.quantity - 1);
-};
-const removeItem = (id) => cartStore.removeFromCart(id);
-
-const checkout = () => {
-  if (confirm("Proceed to checkout?")) {
-    alert("✅ Order placed successfully! (Orders module coming next)");
-    cartStore.clearCart();
-    showCartModal.value = false;
+  try {
+    const res = await axios.get('/api/products');
+    products.value = res.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
   }
 };
 
@@ -164,15 +255,77 @@ const logout = () => {
   router.push('/login');
 };
 
-onMounted(() => {
-  fetchProducts();
-  if (authStore.isLoggedIn) {
-    cartStore.loadCart();
+const openQuickView = (product) => {
+  if (!authStore.isLoggedIn) {
+    alert("Please login first to add items to cart!");
+    router.push('/login');
+    return;
   }
-  refreshInterval = setInterval(fetchProducts, 10000);
+  selectedProduct.value = product;
+  quickQty.value = 1;
+  showQuickView.value = true;
+};
+
+const confirmAddToCart = async () => {
+  for(let i = 0; i < quickQty.value; i++) {
+    await cartStore.addToCart(selectedProduct.value);
+  }
+  showQuickView.value = false;
+  // Optional: Open cart modal automatically to show it was added
+  // showCartModal.value = true;
+};
+
+// Cart Controls
+const increaseQty = (item) => cartStore.updateQuantity(item.id, item.quantity + 1);
+const decreaseQty = (item) => {
+  if (item.quantity > 1) cartStore.updateQuantity(item.id, item.quantity - 1);
+};
+const removeItem = (id) => cartStore.removeFromCart(id);
+
+const checkout = () => {
+  if (confirm("Proceed to checkout?")) {
+    alert("✅ Order placed successfully!");
+    cartStore.clearCart();
+    showCartModal.value = false;
+  }
+};
+
+// Filter, Sort, Pagination
+const filteredAndSortedProducts = computed(() => {
+  let result = [...products.value];
+  if (searchQuery.value) {
+    result = result.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  }
+  if (sortOrder.value === 'asc') {
+    result.sort((a, b) => a.price - b.price);
+  } else if (sortOrder.value === 'desc') {
+    result.sort((a, b) => b.price - a.price);
+  } else {
+    result.sort((a, b) => b.id - a.id);
+  }
+  return result;
 });
 
-onUnmounted(() => {
-  if (refreshInterval) clearInterval(refreshInterval);
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredAndSortedProducts.value.length / itemsPerPage)));
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return filteredAndSortedProducts.value.slice(start, start + itemsPerPage);
 });
+
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+watch(searchQuery, () => { currentPage.value = 1; });
+
+onMounted(() => {
+  fetchProducts();
+  if (authStore.isLoggedIn) cartStore.loadCart();
+  refreshInterval = setInterval(fetchProducts, 30000);
+});
+
+onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval); });
 </script>

@@ -1,85 +1,99 @@
 <template>
-  <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-semibold">Users Management</h2>
+  <div class="space-y-6">
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
+      <div>
+        <h2 class="text-2xl font-semibold text-purple-800">Users Management</h2>
+        <p class="text-gray-500 text-sm">Manage administrative and customer access</p>
+      </div>
       <button @click="openCreateModal"
-              class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 flex items-center gap-2">
-        <span>+</span> Add New User
+              class="bg-purple-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-800 transition-colors shadow-sm flex items-center gap-2">
+        <span class="text-lg">+</span> Add New User
       </button>
     </div>
 
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-      <table class="w-full">
-        <thead class="bg-gray-50">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-purple-600 text-white">
           <tr>
-            <th class="px-6 py-4 text-left">Full Name</th>
-            <th class="px-6 py-4 text-left">Email</th>
-            <th class="px-6 py-4 text-left">Role</th>
-            <th class="px-6 py-4 text-left">Status</th>
-            <th class="px-6 py-4 text-left">Joined</th>
-            <th class="px-6 py-4 text-center">Actions</th>
+            <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Full Name</th>
+            <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Email</th>
+            <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Role</th>
+            <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-sm font-semibold uppercase tracking-wider text-center">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y">
-          <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 font-medium">{{ user.full_name }}</td>
-            <td class="px-6 py-4">{{ user.email }}</td>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="user in users" :key="user.id" class="hover:bg-purple-50/30 transition-colors">
             <td class="px-6 py-4">
-              <span class="px-3 py-1 text-xs font-medium rounded-full"
+              <span class="font-medium text-gray-700">{{ user.full_name }}</span>
+            </td>
+            <td class="px-6 py-4 text-gray-600 text-sm">
+              {{ user.email }}
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-md tracking-wider"
                     :class="user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'">
-                {{ user.role.toUpperCase() }}
+                {{ user.role }}
               </span>
             </td>
             <td class="px-6 py-4">
-              <span class="px-3 py-1 text-xs font-medium rounded-full"
-                    :class="user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+              <button @click="toggleActive(user)"
+                      :class="user.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'"
+                      class="px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">
                 {{ user.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-500">
-              {{ new Date(user.created_at).toLocaleDateString() }}
-            </td>
-            <td class="px-6 py-4 text-center space-x-4">
-              <button @click="editUser(user)" class="text-blue-600 hover:underline">Edit</button>
-              <button @click="toggleActive(user)" class="text-yellow-600 hover:underline">
-                {{ user.is_active ? 'Deactivate' : 'Activate' }}
               </button>
-              <button @click="deleteUser(user)" class="text-red-600 hover:underline">Delete</button>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex justify-center items-center gap-4">
+                <button @click="editUser(user)" class="hover:scale-125 transition-transform" title="Edit">
+                  <span class="text-lg">✏️</span>
+                </button>
+
+                <button @click="toggleActive(user)" class="hover:scale-125 transition-transform" :title="user.is_active ? 'Deactivate' : 'Activate'">
+                  <span class="text-lg">{{ user.is_active ? '🚫' : '✅' }}</span>
+                </button>
+
+                <button @click="deleteUser(user)" class="hover:scale-125 transition-transform text-red-500" title="Delete">
+                  <span class="text-lg">🗑️</span>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- User Create/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <h3 class="text-2xl font-bold mb-6">{{ isEditing ? 'Edit User' : 'Create New User' }}</h3>
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200">
+        <div class="bg-purple-700 p-4 px-8 flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-white">{{ isEditing ? 'Edit User' : 'Create New User' }}</h3>
+          <div class="flex gap-2">
+            <button @click="saveUser" class="bg-white text-purple-700 px-5 py-1.5 rounded-md font-bold text-xs hover:bg-gray-100 transition-all">SAVE</button>
+            <button @click="closeModal" class="bg-purple-800 text-white px-5 py-1.5 rounded-md font-bold text-xs hover:bg-purple-900 transition-all border border-purple-500/30">CANCEL</button>
+          </div>
+        </div>
 
-        <form @submit.prevent="saveUser" class="space-y-5">
-          <div>
-            <label class="block text-sm font-medium mb-1">Full Name</label>
-            <input v-model="form.full_name" type="text" required class="w-full px-4 py-3 border rounded-lg">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Email</label>
-            <input v-model="form.email" type="email" required class="w-full px-4 py-3 border rounded-lg">
-          </div>
+        <form @submit.prevent="saveUser" class="p-8 space-y-4 bg-[#fdfcff]">
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+              <input v-model="form.full_name" type="text" required class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-purple-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+              <input v-model="form.email" type="email" required class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-purple-500 outline-none">
+            </div>
 
-          <div v-if="!isEditing">
-            <label class="block text-sm font-medium mb-1">Password</label>
-            <input v-model="form.password" type="password" required class="w-full px-4 py-3 border rounded-lg">
-          </div>
-          <div v-if="!isEditing">
-            <label class="block text-sm font-medium mb-1">Confirm Password</label>
-            <input v-model="form.password_confirmation" type="password" required class="w-full px-4 py-3 border rounded-lg">
-          </div>
-
-          <div class="flex gap-3 pt-4">
-            <button type="button" @click="closeModal" class="flex-1 py-3 border rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700">
-              {{ isEditing ? 'Update User' : 'Create User' }}
-            </button>
+            <template v-if="!isEditing">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                <input v-model="form.password" type="password" required class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-purple-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm Password</label>
+                <input v-model="form.password_confirmation" type="password" required class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-purple-500 outline-none">
+              </div>
+            </template>
           </div>
         </form>
       </div>
@@ -98,8 +112,12 @@ const currentUserId = ref(null);
 const form = ref({ full_name: '', email: '', password: '', password_confirmation: '' });
 
 const fetchUsers = async () => {
-  const res = await axios.get('/api/users');
-  users.value = res.data;
+  try {
+    const res = await axios.get('/api/users');
+    users.value = res.data;
+  } catch (err) {
+    console.error("Error fetching users");
+  }
 };
 
 const openCreateModal = () => {
@@ -127,23 +145,30 @@ const saveUser = async () => {
     }
     closeModal();
     fetchUsers();
-    alert(isEditing.value ? 'User updated!' : 'User created successfully!');
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed');
+    alert(error.response?.data?.message || 'Failed to save user');
   }
 };
 
 const toggleActive = async (user) => {
-  if (confirm(`Are you sure?`)) {
-    await axios.patch(`/api/users/${user.id}/toggle-active`);
-    fetchUsers();
+  if (confirm(`Change status for ${user.full_name}?`)) {
+    try {
+      await axios.patch(`/api/users/${user.id}/toggle-active`);
+      fetchUsers();
+    } catch (err) {
+      console.error("Status toggle failed");
+    }
   }
 };
 
 const deleteUser = async (user) => {
-  if (confirm('Delete permanently?')) {
-    await axios.delete(`/api/users/${user.id}`);
-    fetchUsers();
+  if (confirm(`Permanently delete user: ${user.full_name}?`)) {
+    try {
+      await axios.delete(`/api/users/${user.id}`);
+      fetchUsers();
+    } catch (err) {
+      console.error("Delete failed");
+    }
   }
 };
 
