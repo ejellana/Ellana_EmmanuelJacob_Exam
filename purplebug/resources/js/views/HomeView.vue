@@ -69,43 +69,45 @@
 
     <!-- Cart Modal -->
     <div v-if="showCartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div class="flex justify-between items-center px-8 py-6 border-b">
-          <h2 class="text-2xl font-bold">🛒 Your Cart</h2>
-          <button @click="showCartModal = false" class="text-4xl text-gray-400 hover:text-gray-600">×</button>
+        <h2 class="text-2xl font-bold">🛒 Your Cart</h2>
+        <button @click="showCartModal = false" class="text-4xl text-gray-400 hover:text-gray-600">×</button>
         </div>
 
         <div class="flex-1 p-6 overflow-auto space-y-4">
-          <div v-if="cartStore.items.length === 0" class="text-center py-16 text-gray-500">
+        <div v-if="cartStore.items.length === 0" class="text-center py-16 text-gray-500">
             Your cart is empty
-          </div>
+        </div>
 
-          <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 bg-gray-50 p-4 rounded-2xl">
+        <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4 bg-gray-50 p-4 rounded-2xl">
             <img v-if="item.image" :src="'/storage/' + item.image" class="w-20 h-20 object-cover rounded-xl">
             <div class="flex-1">
-              <h4 class="font-semibold">{{ item.name }}</h4>
-              <p class="text-purple-600 font-bold">₱{{ (item.price * item.quantity).toFixed(2) }}</p>
+            <h4 class="font-semibold">{{ item.name }}</h4>
+            <p class="text-purple-600 font-bold">₱{{ (item.price * item.quantity).toFixed(2) }}</p>
 
-              <div class="flex items-center gap-4 mt-3">
+            <div class="flex items-center gap-4 mt-3">
                 <button @click="decreaseQty(item)" class="w-8 h-8 border rounded-lg hover:bg-gray-100">-</button>
                 <span class="font-medium w-6 text-center">{{ item.quantity }}</span>
                 <button @click="increaseQty(item)" class="w-8 h-8 border rounded-lg hover:bg-gray-100">+</button>
                 <button @click="removeItem(item.id)" class="ml-auto text-red-600 hover:text-red-700">Remove</button>
-              </div>
             </div>
-          </div>
+            </div>
+        </div>
         </div>
 
         <div class="p-6 border-t bg-gray-50 rounded-b-3xl">
-          <div class="flex justify-between text-xl font-bold mb-6">
+        <div class="flex justify-between text-xl font-bold mb-6">
             <span>Total</span>
             <span>₱{{ cartStore.totalAmount.toFixed(2) }}</span>
-          </div>
-          <button @click="checkout" class="w-full bg-purple-600 text-white py-4 rounded-2xl text-lg font-semibold hover:bg-purple-700">
-            Place Order
-          </button>
         </div>
-      </div>
+        <button @click="checkout"
+                :disabled="cartStore.items.length === 0"
+                class="w-full bg-purple-600 text-white py-4 rounded-2xl text-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400">
+            Place Order
+        </button>
+        </div>
+    </div>
     </div>
   </div>
 </template>
