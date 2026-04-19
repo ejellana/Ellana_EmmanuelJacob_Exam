@@ -35,6 +35,11 @@ Code snippet
               {{ cartStore.totalItems }}
             </span>
           </button>
+          <!-- Orders Button -->
+          <button v-if="authStore.isLoggedIn" @click="showOrdersModal = true"
+                  class="text-gray-400 hover:text-[#7D3C98] transition-colors p-2 text-xl">
+            📋
+          </button>
 
           <template v-if="!authStore.isLoggedIn">
             <router-link to="/login" class="text-[#7D3C98] px-4 py-2 rounded-lg hover:bg-purple-50 transition font-bold text-xs border border-purple-100 uppercase tracking-wide">
@@ -179,6 +184,7 @@ Code snippet
       </div>
     </div>
 
+    <!-- Cart Modal (updated) -->
     <div v-if="showCartModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200">
         <div class="p-5 flex justify-between items-center bg-white border-b border-gray-100">
@@ -200,9 +206,9 @@ Code snippet
               <p class="text-[#7D3C98] font-bold text-sm">₱{{ (item.price * item.quantity).toLocaleString() }}</p>
             </div>
             <div class="flex items-center border border-gray-200 rounded overflow-hidden h-8">
-              <button @click="decreaseQty(item)" class="px-2 hover:bg-gray-50">-</button>
+              <button @click="decreaseQty(item)" class="px-2 hover:bg-gray-50 transition-colors">-</button>
               <span class="px-3 text-xs font-bold">{{ item.quantity }}</span>
-              <button @click="increaseQty(item)" class="px-2 hover:bg-gray-50">+</button>
+              <button @click="increaseQty(item)" class="px-2 hover:bg-gray-50 transition-colors">+</button>
             </div>
             <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors">🗑️</button>
           </div>
@@ -220,6 +226,19 @@ Code snippet
         </div>
       </div>
     </div>
+
+    <!-- My Orders Modal -->
+    <div v-if="showOrdersModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-6 border-b flex justify-between items-center">
+          <h2 class="text-2xl font-bold">📋 My Orders</h2>
+          <button @click="showOrdersModal = false" class="text-3xl text-gray-400 hover:text-gray-600">×</button>
+        </div>
+        <div class="flex-1 p-6 overflow-auto">
+          <MyOrders />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -229,6 +248,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
 import { useRouter } from 'vue-router';
+import MyOrders from './MyOrders.vue';
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
@@ -237,6 +257,7 @@ const router = useRouter();
 // State
 const products = ref([]);
 const showCartModal = ref(false);
+const showOrdersModal = ref(false);
 const showQuickView = ref(false);
 const selectedProduct = ref(null);
 const quickQty = ref(1);
@@ -289,11 +310,19 @@ const decreaseQty = (item) => {
 };
 const removeItem = (id) => cartStore.removeFromCart(id);
 
-const checkout = () => {
+const checkout = async () => {
+  if (cartStore.items.length === 0) return;
+
   if (confirm("Proceed to checkout?")) {
-    alert("✅ Order placed successfully!");
-    cartStore.clearCart();
-    showCartModal.value = false;
+    try {
+      const res = await axios.post('/api/orders/checkout');
+      alert(res.data.message || "✅ Order placed successfully!");
+      cartStore.clearCart();
+      showCartModal.value = false;
+      showOrdersModal.value = true; // Open orders after checkout
+    } catch (error) {
+      alert(error.response?.data?.message || "Checkout failed");
+    }
   }
 };
 
@@ -330,9 +359,13 @@ watch(searchQuery, () => { currentPage.value = 1; });
 
 onMounted(() => {
   fetchProducts();
-  if (authStore.isLoggedIn) cartStore.loadCart();
+  if (authStore.isLoggedIn) {
+    cartStore.loadCart();
+  }
   refreshInterval = setInterval(fetchProducts, 30000);
 });
 
-onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval); });
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval);
+});
 </script>

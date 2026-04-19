@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Orders Routes
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders/checkout', [OrderController::class, 'checkout']);
+    Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel']);
 
     // Admin Only
     Route::middleware('admin')->group(function () {
@@ -35,5 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+        Route::get('/admin/orders', [App\Http\Controllers\Api\OrderController::class, 'adminIndex']);
+        Route::put('/admin/orders/{order}/status', [App\Http\Controllers\Api\OrderController::class, 'updateStatus']);
+        Route::delete('/admin/orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'destroy']);
     });
 });

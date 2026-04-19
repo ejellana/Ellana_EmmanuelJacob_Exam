@@ -88,4 +88,51 @@ class OrderController extends Controller
             return response()->json(['message' => 'Checkout failed'], 500);
         }
     }
+    // Admin: Get all orders
+    public function adminIndex()
+    {
+        $orders = Order::with(['user', 'items.product'])
+            ->latest()
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    // Admin: Update order status
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:Pending,For Delivery,Delivered,Canceled'
+        ]);
+
+        $order->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => 'Order status updated successfully',
+            'order' => $order
+        ]);
+    }
+
+    // Admin: Delete order
+    public function destroy(Order $order)
+    {
+        $order->delete();
+        return response()->json(['message' => 'Order deleted successfully']);
+    }
+
+    // User cancel order
+    public function cancel(Request $request, Order $order)
+    {
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== 'Pending') {
+            return response()->json(['message' => 'Only pending orders can be cancelled'], 400);
+        }
+
+        $order->update(['status' => 'Canceled']);
+
+        return response()->json(['message' => 'Order cancelled successfully']);
+    }
 }

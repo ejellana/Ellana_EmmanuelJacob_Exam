@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-[#C8A2C8] flex">
+    <!-- Sidebar -->
     <div class="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-gray-200 z-50 shadow-sm">
       <div class="p-6">
         <div class="flex items-center">
@@ -51,13 +52,12 @@
       </div>
     </div>
 
+    <!-- Main Content -->
     <div class="flex-1 ml-64">
       <div class="p-8 max-w-[1400px] mx-auto">
-        <UsersManagement v-if="currentPage === 'users'" />
         <ProductManagement v-if="currentPage === 'products'" />
-        <div v-if="currentPage === 'orders'" class="bg-white p-10 rounded-xl border border-gray-200 text-center text-gray-400">
-           Order Management Module Coming Soon
-        </div>
+        <OrdersManagement v-if="currentPage === 'orders'" />
+        <UsersManagement v-if="currentPage === 'users'" />
       </div>
     </div>
   </div>
@@ -70,13 +70,14 @@ import { useAuthStore } from '../../stores/auth';
 
 import UsersManagement from './UsersManagement.vue';
 import ProductManagement from './ProductManagement.vue';
+import OrdersManagement from './OrdersManagement.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const currentPage = ref('products');
 
 const logout = () => {
-  if(confirm("Are you sure you want to logout?")) {
+  if (confirm("Are you sure you want to logout?")) {
     authStore.logout();
     router.push('/login');
   }
@@ -90,10 +91,3 @@ onMounted(() => {
   if (!authStore.isAdmin) router.push('/');
 });
 </script>
-
-<style scoped>
-/* Ensure the sidebar text looks crisp */
-h1, button, span {
-  -webkit-font-smoothing: antialiased;
-}
-</style>

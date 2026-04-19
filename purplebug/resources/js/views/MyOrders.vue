@@ -30,8 +30,17 @@
         </div>
       </div>
 
-      <div class="px-6 py-4 bg-gray-50 text-right font-bold">
-        Total: ₱{{ parseFloat(order.total_amount).toFixed(2) }}
+      <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
+        <div class="font-bold text-lg">
+          Total: ₱{{ parseFloat(order.total_amount).toFixed(2) }}
+        </div>
+
+        <!-- Cancel Button - Only for Pending orders -->
+        <button v-if="order.status === 'Pending'"
+                @click="cancelOrder(order)"
+                class="px-5 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+          <span>✕</span> Cancel Order
+        </button>
       </div>
     </div>
   </div>
@@ -53,6 +62,18 @@ const getStatusClass = (status) => {
   if (status === 'For Delivery') return 'bg-blue-100 text-blue-700';
   if (status === 'Canceled') return 'bg-red-100 text-red-700';
   return 'bg-yellow-100 text-yellow-700';
+};
+
+const cancelOrder = async (order) => {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+
+  try {
+    await axios.put(`/api/orders/${order.id}/cancel`);
+    alert('Order cancelled successfully');
+    fetchOrders(); // Refresh list
+  } catch (error) {
+    alert(error.response?.data?.message || 'Failed to cancel order');
+  }
 };
 
 onMounted(fetchOrders);
