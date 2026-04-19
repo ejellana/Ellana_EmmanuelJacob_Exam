@@ -30,6 +30,11 @@
                 :class="currentPage === 'users' ? 'bg-[#7D3C98] text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
           <span class="text-xl">👥</span> Users Management
         </button>
+        <button @click="switchPage('activity')"
+                class="w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 text-sm font-medium"
+                :class="currentPage === 'activity' ? 'bg-[#7D3C98] text-white shadow-md' : 'text-gray-500 hover:bg-purple-50 hover:text-purple-700'">
+        <span class="text-xl">📜</span> Activity Logs
+        </button>
       </nav>
 
       <div class="p-4 mt-auto border-t border-gray-100">
@@ -58,6 +63,7 @@
         <ProductManagement v-if="currentPage === 'products'" />
         <OrdersManagement v-if="currentPage === 'orders'" />
         <UsersManagement v-if="currentPage === 'users'" />
+        <ActivityLogs v-if="currentPage === 'activity'" />
       </div>
     </div>
   </div>
@@ -71,6 +77,7 @@ import { useAuthStore } from '../../stores/auth';
 import UsersManagement from './UsersManagement.vue';
 import ProductManagement from './ProductManagement.vue';
 import OrdersManagement from './OrdersManagement.vue';
+import ActivityLogs from './ActivityLogs.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

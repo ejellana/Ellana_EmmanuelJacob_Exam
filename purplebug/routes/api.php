@@ -39,5 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/orders', [App\Http\Controllers\Api\OrderController::class, 'adminIndex']);
         Route::put('/admin/orders/{order}/status', [App\Http\Controllers\Api\OrderController::class, 'updateStatus']);
         Route::delete('/admin/orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'destroy']);
+        Route::get('/admin/activity-logs', [App\Http\Controllers\Api\AdminActivityController::class, 'index']);
     });
 });

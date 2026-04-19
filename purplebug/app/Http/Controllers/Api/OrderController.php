@@ -28,6 +28,10 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $cartItems = CartItem::with('product')
             ->where('user_id', $user->id)
             ->get();
@@ -41,46 +45,50 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            // Create Order
             $order = Order::create([
-                'user_id' => $user->id,
+                'user_id'      => $user->id,
                 'total_amount' => 0,
-                'status' => 'Pending'
+                'status'       => 'Pending'
             ]);
 
             foreach ($cartItems as $cartItem) {
                 $product = $cartItem->product;
 
-                // Check stock again
                 if ($product->stocks < $cartItem->quantity) {
                     DB::rollBack();
                     return response()->json(['message' => 'Not enough stock for ' . $product->name], 400);
                 }
 
                 OrderItem::create([
-                    'order_id' => $order->id,
+                    'order_id'   => $order->id,
                     'product_id' => $product->id,
-                    'quantity' => $cartItem->quantity,
-                    'price' => $product->price
+                    'quantity'   => $cartItem->quantity,
+                    'price'      => $product->price
                 ]);
 
                 $totalAmount += $product->price * $cartItem->quantity;
-
-                // Reduce stock
                 $product->decrement('stocks', $cartItem->quantity);
             }
 
-            // Update total amount
             $order->update(['total_amount' => $totalAmount]);
 
-            // Clear cart
+            // Log Activity
+            activity()
+                ->causedBy($user)
+                ->withProperties([
+                    'order_id'     => $order->id,
+                    'total_amount' => $totalAmount,
+                    'items_count'  => $cartItems->count()
+                ])
+                ->log('placed new order');
+
             CartItem::where('user_id', $user->id)->delete();
 
             DB::commit();
 
             return response()->json([
                 'message' => 'Order placed successfully!',
-                'order' => $order->load('items.product')
+                'order'   => $order->load('items.product')
             ]);
 
         } catch (\Exception $e) {
@@ -88,6 +96,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Checkout failed'], 500);
         }
     }
+
     // Admin: Get all orders
     public function adminIndex()
     {
@@ -99,13 +108,22 @@ class OrderController extends Controller
     }
 
     // Admin: Update order status
+    // Admin: Update order status
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
             'status' => 'required|in:Pending,For Delivery,Delivered,Canceled'
         ]);
 
+        $oldStatus = $order->status;
         $order->update(['status' => $request->status]);
+
+        // Log Activity
+        activity()
+            // Change auth()->user() to $request->user()
+            ->causedBy($request->user())
+            ->withProperties(['old_status' => $oldStatus, 'new_status' => $request->status])
+            ->log('updated order status');
 
         return response()->json([
             'message' => 'Order status updated successfully',
@@ -120,7 +138,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Order deleted successfully']);
     }
 
-    // User cancel order
+    // User: Cancel order
     public function cancel(Request $request, Order $order)
     {
         if ($order->user_id !== $request->user()->id) {
@@ -132,6 +150,10 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => 'Canceled']);
+
+        activity()
+            ->causedBy($request->user())
+            ->log('cancelled order #' . $order->id);
 
         return response()->json(['message' => 'Order cancelled successfully']);
     }
