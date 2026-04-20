@@ -30,8 +30,8 @@
         </div>
       </div>
 
-      <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-        <div class="font-bold text-lg">
+      <div class="px-6 py-4 bg-[#7D3C98] flex justify-between items-center">
+        <div class="font-bold text-lg text-amber-50">
           Total: ₱{{ parseFloat(order.total_amount).toFixed(2) }}
         </div>
 
