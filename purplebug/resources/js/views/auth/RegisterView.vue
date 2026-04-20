@@ -8,24 +8,25 @@
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div>
           <input v-model="form.full_name" type="text" placeholder="Full Name"
-                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98] transition-colors" required />
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98]" required />
         </div>
         <div>
           <input v-model="form.email" type="email" placeholder="Email"
-                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98] transition-colors" required />
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98]" required />
         </div>
         <div>
           <input v-model="form.password" type="password" placeholder="Password"
-                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98] transition-colors" required />
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98]" required />
         </div>
         <div>
           <input v-model="form.password_confirmation" type="password" placeholder="Confirm Password"
-                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98] transition-colors" required />
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#7D3C98]" required />
         </div>
 
         <button type="submit"
-                class="w-full bg-[#7D3C98] text-white py-3 rounded-lg hover:opacity-90 transition font-bold">
-          Register
+                :disabled="isLoading"
+                class="w-full bg-[#7D3C98] text-white py-3 rounded-lg hover:opacity-90 transition font-bold disabled:opacity-70">
+          {{ isLoading ? 'Registering...' : 'Register' }}
         </button>
       </form>
 
@@ -52,13 +53,22 @@ const form = ref({
   password_confirmation: ''
 });
 
+const isLoading = ref(false);
+
 const handleRegister = async () => {
+  isLoading.value = true;
+
   try {
     await authStore.register(form.value);
+
     alert('Registration successful!');
-    router.push(authStore.isAdmin ? '/admin/dashboard' : '/');
+    router.push('/login');
+
   } catch (error) {
-    alert(error.response?.data?.message || 'Registration failed');
+    console.error(error);
+    alert(error.response?.data?.message || 'Registration failed. Please try again.');
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

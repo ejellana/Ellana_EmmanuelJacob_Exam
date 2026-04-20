@@ -20,12 +20,10 @@ class RegisterController extends Controller
             'is_active'     => true,
         ]);
 
-        $user->sendEmailVerificationNotification();
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
+            'message' => 'Registration successful! Please check your email to verify your account.',
             'user'    => $user,
             'token'   => $token,
             'role'    => $user->role

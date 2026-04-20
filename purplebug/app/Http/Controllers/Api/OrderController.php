@@ -108,7 +108,6 @@ class OrderController extends Controller
     }
 
     // Admin: Update order status
-    // Admin: Update order status
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
@@ -116,19 +115,35 @@ class OrderController extends Controller
         ]);
 
         $oldStatus = $order->status;
-        $order->update(['status' => $request->status]);
 
-        // Log Activity
-        activity()
-            // Change auth()->user() to $request->user()
-            ->causedBy($request->user())
-            ->withProperties(['old_status' => $oldStatus, 'new_status' => $request->status])
-            ->log('updated order status');
+        DB::beginTransaction();
 
-        return response()->json([
-            'message' => 'Order status updated successfully',
-            'order' => $order
-        ]);
+        try {
+            if ($request->status === 'Canceled' && $oldStatus !== 'Canceled') {
+                // Restore stock if changing to Canceled
+                foreach ($order->items as $item) {
+                    $item->product->increment('stocks', $item->quantity);
+                }
+            }
+
+            $order->update(['status' => $request->status]);
+
+            activity()
+                ->causedBy($request->user())
+                ->withProperties(['old_status' => $oldStatus, 'new_status' => $request->status])
+                ->log('updated order status');
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Order status updated successfully',
+                'order' => $order
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to update status'], 500);
+        }
     }
 
     // Admin: Delete order
@@ -149,12 +164,27 @@ class OrderController extends Controller
             return response()->json(['message' => 'Only pending orders can be cancelled'], 400);
         }
 
-        $order->update(['status' => 'Canceled']);
+        DB::beginTransaction();
 
-        activity()
-            ->causedBy($request->user())
-            ->log('cancelled order #' . $order->id);
+        try {
+            // Restore stock for each item
+            foreach ($order->items as $item) {
+                $item->product->increment('stocks', $item->quantity);
+            }
 
-        return response()->json(['message' => 'Order cancelled successfully']);
+            $order->update(['status' => 'Canceled']);
+
+            activity()
+                ->causedBy($request->user())
+                ->log('cancelled order #' . $order->id);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Order cancelled successfully. Stock has been restored.']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to cancel order'], 500);
+        }
     }
 }
